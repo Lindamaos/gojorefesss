@@ -1,3 +1,4 @@
+import os
 import asyncio
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
@@ -8,7 +9,9 @@ CHANNEL_ID = '-1002274444077'  # ID del canal de referencias
 
 # ID del usuario @gusies que puede aprobar grupos
 OWNER_ID = 7116662379  # Tu ID de usuario
-APPROVED_GROUPS = set()  # Lista dinámica de grupos aprobados
+
+# Lista dinámica de grupos aprobados (con un grupo pre-aprobado)
+APPROVED_GROUPS = {-1002436988879}  # Este grupo estará aprobado siempre por defecto
 
 # Función para aprobar grupos dinámicamente
 async def approve_group(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -71,14 +74,22 @@ async def refe_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # Función principal
-def main():
+async def start_app():
     app = ApplicationBuilder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("approvegroup", approve_group))
     app.add_handler(CommandHandler("refe", refe_command))
-    print("El bot está activo. Presiona Ctrl+C para detenerlo.")
-    app.run_polling()
+
+    # Obtener el puerto desde la variable de entorno de Render
+    port = int(os.environ.get("PORT", 8080))
+
+    # Iniciar el bot como un servidor web (para Render)
+    async def run_app():
+        print(f"El bot está activo en el puerto {port}.")
+        await app.start()
+        await asyncio.Event().wait()  # Mantener la aplicación corriendo
+
+    await run_app()
 
 
-# Ejecuta el bot
 if __name__ == "__main__":
-    main()
+    asyncio.run(start_app())
