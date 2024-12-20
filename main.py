@@ -73,22 +73,16 @@ async def refe_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("✅ ¡Referencia enviada correctamente!")
 
 
-# Función principal
-async def start_app():
-    # Inicializa la aplicación correctamente
-    app = Application.builder().token(BOT_TOKEN).build()
+# Inicializa la aplicación para gunicorn
+app = Application.builder().token(BOT_TOKEN).build()
 
-    # Configura los manejadores de comandos
-    app.add_handler(CommandHandler("approvegroup", approve_group))
-    app.add_handler(CommandHandler("refe", refe_command))
+# Configura los manejadores de comandos
+app.add_handler(CommandHandler("approvegroup", approve_group))
+app.add_handler(CommandHandler("refe", refe_command))
 
-    # Inicia el bot
-    print("El bot está activo.")
-    await app.initialize()  # Inicialización explícita
-    await app.start()
-    await app.updater.start_polling()  # Para que funcione como servicio
-    await asyncio.Event().wait()  # Mantener corriendo
-
+# Mensaje para confirmar que el bot está activo
+print("El bot está activo y listo para recibir comandos.")
 
 if __name__ == "__main__":
-    asyncio.run(start_app())
+    import asyncio
+    asyncio.run(app.initialize())
