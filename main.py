@@ -1,7 +1,7 @@
 import os
 import asyncio
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+from telegram.ext import Application, ApplicationBuilder, CommandHandler, ContextTypes
 
 # Token del bot
 BOT_TOKEN = '7411610720:AAEZjL4JD_JAyxlXiARFdneG5JGw4aGOAHc'
@@ -75,20 +75,19 @@ async def refe_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # Función principal
 async def start_app():
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    # Inicializa la aplicación correctamente
+    app = Application.builder().token(BOT_TOKEN).build()
+
+    # Configura los manejadores de comandos
     app.add_handler(CommandHandler("approvegroup", approve_group))
     app.add_handler(CommandHandler("refe", refe_command))
 
-    # Obtener el puerto desde la variable de entorno de Render
-    port = int(os.environ.get("PORT", 8080))
-
-    # Iniciar el bot como un servidor web (para Render)
-    async def run_app():
-        print(f"El bot está activo en el puerto {port}.")
-        await app.start()
-        await asyncio.Event().wait()  # Mantener la aplicación corriendo
-
-    await run_app()
+    # Inicia el bot
+    print("El bot está activo.")
+    await app.initialize()  # Inicialización explícita
+    await app.start()
+    await app.updater.start_polling()  # Para que funcione como servicio
+    await asyncio.Event().wait()  # Mantener corriendo
 
 
 if __name__ == "__main__":
